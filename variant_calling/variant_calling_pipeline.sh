@@ -16,7 +16,8 @@ read2_url="ftp://ftp.sra.ebi.ac.uk/vol1/run/ERR339/ERR3396992/Sample_CCK81_T3_R2
 ref_genome_url="ftp://ftp.ensembl.org/pub/release-94/fasta/homo_sapiens/dna/Homo_sapiens.GRCh38.dna.primary_assembly.fa.gz"
 gtf_file_url="https://ftp.ensembl.org/pub/release-94/gtf/homo_sapiens/Homo_sapiens.GRCh38.94.gtf.gz"
 
-### Directory initialization
+
+### Directory structure
 
 mkdir -p $cell_line \
          $cell_line/raw_data/ \
@@ -24,14 +25,15 @@ mkdir -p $cell_line \
          $cell_line/raw_data/hg38/ \
          $cell_line/quality_control/ \
          $cell_line/alignment/ \
-         $cell_line/variant_calls
+         $cell_line/variant_calls/
 
 cd $cell_line
 
+
 ### Data
 
-# Download compressed sequencing data from cell line 
-read1="raw_data/"$cell_line/"read_1.fq"
+# Download compressed cell line sequencing data  
+read1="raw_data/"$cell_line"/read_1.fq"
 read2="raw_data/"$cell_line"/read_2.fq"
 
 wget -O $read1".gz" $read1_url
@@ -41,8 +43,8 @@ gunzip $read1".gz"
 gunzip $read2".gz"
 
 # Download hg38 reference genome from Ensembl
-ref_genome="raw_data/hg38/primary_assembly.fa"
-gtf_file="raw_data/hg38/annotation_info.gtf"
+ref_genome=raw_data/hg38/"primary_assembly.fa"
+gtf_file=raw_data/hg38/"annotation_info.gtf"
 
 wget -O $ref_genome".gz" $ref_genome_url
 wget -O $gtf_file".gz" $gtf_file_url
@@ -73,10 +75,10 @@ STAR --runMode alignReads \
      --genomeDir alignment \
      --readFilesIn $read1 $read2 \
      --outSAMtype BAM SortedByCoordinate \
-     --outFileNamePrefix   \
+     --outFileNamePrefix $cell_line  \
      --runThreadN $n_threads
 
-output_bam=$alignment".sortedByCoord.out.bam"
+output_bam=$cell_line".sortedByCoord.out.bam"
 
 ### Variant calling
 cd ../variant_calls
