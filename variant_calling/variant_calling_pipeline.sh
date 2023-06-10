@@ -25,7 +25,8 @@ mkdir -p $cell_line \
          $cell_line/raw_data/hg38/ \
          $cell_line/quality_control/ \
          $cell_line/alignment/ \
-         $cell_line/variant_calls/
+         $cell_line/variant_calls/ \
+         $cell_line/variant_annotation/
 
 cd $cell_line
 
@@ -80,6 +81,9 @@ STAR --runMode alignReads \
 
 output_bam=$cell_line".sortedByCoord.out.bam"
 
+# Free space 
+rm -rf $cell_line/raw_data
+
 ### Variant calling
 cd ../variant_calls
 
@@ -87,7 +91,12 @@ gatk Mutect2 \
     -R $ref_genome \
     -I $output_bam \
     -O $cell_line_"variants.vcf"
+    
+    
+### Variant annotation
+perl convert2annovar.pl \
+    -format vcf4 $cell_line_"variants.vcf" > $cell_line".input"
 
-### Free space 
-rm -rf $cell_line/raw_data
-
+perl annotate_variation.pl \
+    -buildver hg38 \
+    -outfile $cell_line_"annotated_variants" > $cell_line".input" humandb/
